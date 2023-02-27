@@ -1,58 +1,52 @@
 import java.util.ArrayList;
 
-public class FIFO {
+/**
+ * This class demonstrate the FIFO (First in first out) page replacement algorithm.
+ * @author Suparida Silapasith
+ * @version 1.0
+ */
 
-    ArrayList<String> frame;
-    int frame_size;
-    int page_fault = 0;
-    int page_hit = 0;
+public class FIFO extends Page_replacement {
 
+    /**
+     * Constructor for object of class FIFO.
+     *
+     * @param frame_size number of frames
+     */
     public FIFO(int frame_size) {
-        frame = new ArrayList<>(frame_size);
-        this.frame_size = frame_size;
+        super(frame_size);
     }
 
-    public void setFrame_size(int size){
-        frame_size = size;
-        frame.clear();
-    }
-
+    /**
+     * Runs the page replacement algorithm using FIFO method.
+     * @param ref_string reference string
+     */
+    @Override
     public void run(String[] ref_string) {
 
-        frame.clear();
-        page_fault = 0;
-        page_hit = 0;
-        int pointer = 0;
+        super.frame.clear();
+        super.page_fault = 0;
+        super.page_hit = 0;
+        int pointer = 0;   // This pointer point the oldest frame
 
+        // For each string in the reference string
         for (String j : ref_string) {
-//            System.out.println("Num: "+j);
-            // มีที่ว่างให้ใส่ string
-            if (frame.contains(j)) {
-//                System.out.println("Page hit!");
-                page_hit++;
-            }else if (frame.size() < frame_size) {
-                frame.add(j);
-                page_fault++;
-                // page hit
+            // The string is presented in the memory >> page hit
+            if (super.frame.contains(j)) {
+                super.page_hit++;
+            // There are empty frame to add new string >> page fault
+            }else if (super.frame.size() < super.frame_size) {
+                super.frame.add(j);
+                super.page_fault++;
+            // The string is not presented in the memory >> page fault
             }else{
-                frame.set(pointer%frame_size, j);
-                pointer = (pointer+1)%frame_size;
-                page_fault++;
+                super.frame.set(pointer, j);              // Replace the oldest page with new string
+                pointer = (pointer+1)%super.frame_size;   // Shift the pointer to the next page
+                super.page_fault++;
             }
-//            System.out.print("[ ");
-//            for (int i : frame)
-//            {
-//                System.out.print(i+" ");
-//            }
-//            System.out.print("]");
-//            System.out.println(" >> Page fault = "+page_fault);
-//            System.out.println();
         }
-    }
-    public void printInfo(String[] ref){
-        run(ref);
-        System.out.print("Frame size: "+frame_size);
-        System.out.println("\tPage faults: "+page_fault);
     }
 
 }
+
+

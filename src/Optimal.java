@@ -2,87 +2,98 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Objects;
 
-public class Optimal {
+/**
+ * This class demonstrate the Optimal page replacement algorithm.
+ * @author Suparida Silapasith
+ * @version 1.0
+ */
+public class Optimal extends Page_replacement {
 
-    ArrayList<String> frame;
-    int frame_size;
-    int page_fault = 0;
-    int page_hit = 0;
-
+    /**
+     * Constructor for object of class Optimal.
+     * @param frame_size number of frames
+     */
     public Optimal(int frame_size) {
-        frame = new ArrayList<>(frame_size);
-        this.frame_size = frame_size;
+        super(frame_size);
     }
 
-    public void setFrame_size(int size){
-        frame_size = size;
-    }
-
+    /**
+     * Runs the page replacement algorithm using Optimal method.
+     * @param ref_string reference string
+     */
     public void run(String[] ref_string) {
 
-        frame.clear();
-        page_fault = 0;
-        page_hit = 0;
-        int page_counter = -1;
-        int select = 0;
+        super.frame.clear();
+        super.page_fault = 0;
+        super.page_hit = 0;
+        int page_counter = 0;   // This variable counts current page number.
+        int select = 0;         // This variable contains the index of page to be replaced.
 
+        /* For each string in the reference string to be added into the memory,
+           there are 3 cases to happen.
+         */
         for (String j : ref_string) {
-//            System.out.println("Num: " + j);
-            // มีที่ว่างให้ใส่ string
-            if (frame.contains(j)) {
-//                System.out.println("Page hit!");
-                page_hit++;
+            // The string is presented in the memory >> page hit
+            if (super.frame.contains(j)) {
+                super.page_hit++;
                 page_counter++;
-            }else if (frame.size() < frame_size) {
-                frame.add(j);
-                page_fault++;
+            // There are empty frame to add new string >> page fault
+            } else if (super.frame.size() < super.frame_size) {
+                super.frame.add(j);
+                super.page_fault++;
                 page_counter++;
-                // page hit
-            }else {
+            // The string is not presented in the memory >> page fault
+            } else {
+                /* This variable is used to check whether there are string that will not
+                   be used anymore in the future.
+                 */
                 boolean find_no = false;
+                /* This list is used to keep the period of time for each string in current pages
+                   until it will exist again in the reference string.
+                */
                 ArrayList<Integer> period = new ArrayList<>();
 
-                for(String k : frame){
+                // Iterates each page in the memory.
+                for (String k : super.frame) {
+                    /* If finding at least one string that will not be used anymore in the future,
+                       then end the iteration and select that string to be replaced.
+                     */
                     if (find_no) break;
-                    int temp = 0;
-                    for (int i=page_counter+1; i< ref_string.length; i++){
-                        if(!Objects.equals(k, ref_string[i])) {
+                    int temp = 0;  // this variable keep the period of time.
+                    /*  Iterating each string in the reference string.
+                        From current the string to the end.
+                     */
+                    for (int i = page_counter; i < ref_string.length; i++) {
+                        // If current page string and current string in reference string are not the same,
+                        if (!Objects.equals(k, ref_string[i])) {
+                            // then if it is the last string then this page will be replaced.
                             if (i == ref_string.length - 1) {
-                                select = frame.indexOf(k);
+                                select = super.frame.indexOf(k);
                                 find_no = true;
                                 break;
                             }
-                            temp++;
-                        }
-                        else {
+                            temp++; // Increases the period of time count by one.
+                        /* But if they are the same, then add the period of time
+                           counted in the list and end reference string iteration.
+                        */
+                        } else {
                             period.add(temp);
                             break;
                         }
                     }
                 }
-//                for (int i : period) System.out.println(i+",");
-                if(!find_no) {
+                /* If there are no string that is not existed later in the reference string,
+                   then replaced the page of string that has the most time period counted.
+                */
+                if (!find_no) {
                     int max = Collections.max(period);
                     select = period.indexOf(max);
                 }
-
-                frame.set(select, j);
-                page_fault++;
+                super.frame.set(select, j); // Replaces the index of selected page with new string
+                super.page_fault++;
                 page_counter++;
-                }
-//                System.out.print("[ ");
-//                for (int i : frame) {
-//                    System.out.print(i + " ");
-//                }
-//                System.out.print("]");
-//                System.out.println(" >> Page fault = " + page_fault);
-//                System.out.println("Page counter: "+page_counter);
+            }
         }
-    }
-    public void printInfo(String[] ref){
-        run(ref);
-        System.out.print("Frame size: "+frame_size);
-        System.out.println("\tPage faults: "+page_fault);
     }
 
 }
